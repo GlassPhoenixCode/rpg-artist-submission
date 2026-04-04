@@ -174,15 +174,14 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
           <div class="field"><label>Year Created</label><input type="text" id="aw-year-1" placeholder="e.g. 2024"></div>
           <div class="field"><label>Price ($) *</label><input type="number" id="aw-price-1" placeholder="0.00" min="0" step="0.01"></div>
           <div class="field span2"><label>Description / Artist Notes</label><textarea id="aw-desc-1" placeholder="Any notes about this piece..."></textarea></div>
-          <div class="field"><label>Condition Notes</label><input type="text" id="aw-condition-1" placeholder="e.g. Excellent, minor scuff on frame"></div>
           <div class="field"><label>Availability</label>
             <select id="aw-avail-1">
               <option value="for_sale">For Sale</option>
               <option value="nfs">Not For Sale (Display Only)</option>
               <option value="commission">Commission Inquiry Only</option>
             </select></div>
-          <div class="field"><label>Placement Notes <span style="color:var(--ash);font-size:9px;">(optional)</span></label><input type="text" id="aw-placement-1" placeholder="e.g. Needs natural light, hang low"></div>
           <div class="field"><label>Insurance Value ($)</label><input type="number" id="aw-insurance-1" placeholder="Replacement value" min="0" step="0.01"></div>
+          <div class="field"><label>Quantity</label><input type="number" id="aw-quantity-1" placeholder="e.g. 1" min="1" step="1" value="1"></div>
           <div class="field"><label>Type</label>
             <select id="aw-type-1">
               <option value="consignment">Consignment (for sale)</option>
@@ -222,6 +221,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
     <div class="card">
       <p class="hint" style="margin-bottom:12px;">Please read the following carefully. You will sign a copy at drop-off.</p>
       <div id="agreement-text" style="font-size:10pt;line-height:1.7;color:#ddd;max-height:340px;overflow-y:auto;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:14px 16px;white-space:pre-wrap;"></div>
+      <div class="btn-row" style="margin-top:14px;"><button class="btn btn-outline" type="button" onclick="printAgreement()">🖨 Print Consignment Agreement</button></div>
     </div>
 
     <!-- Submit -->
@@ -231,7 +231,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
       <div class="btn-row">
         <button id="btn-export-email" class="btn btn-success" type="button" onclick="exportAndEmail()" style="font-size:13px;padding:12px 24px;">↓ Export &amp; Email My Submission</button>
       </div>
-      <p class="hint" style="margin-top:10px;">Submitting to: <strong style="color:var(--smoke);">RisingPhoenixGallery@Gmail.com</strong></p>
+      <p class="hint" style="margin-top:10px;">Submitting to: <strong style="color:var(--smoke);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="75271c061c1b12251d1a101b1c0d3214191910070c353218141c195b161a18">[email&#160;protected]</a></strong></p>
     </div>
 
   </div><!-- /main-form -->
@@ -239,7 +239,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
 
 <div id="portal-toast" class="toast"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ═══════════════════════════════════════════════════════
    EXHIBIT DATA
 ═══════════════════════════════════════════════════════ */
@@ -367,11 +367,10 @@ function addArtwork() {
     + '<div class="field"><label>Year Created</label><input type="text" id="aw-year-' + n + '" placeholder="e.g. 2024"></div>'
     + '<div class="field"><label>Price ($) *</label><input type="number" id="aw-price-' + n + '" placeholder="0.00" min="0" step="0.01"></div>'
     + '<div class="field span2"><label>Description / Artist Notes</label><textarea id="aw-desc-' + n + '" placeholder="Any notes about this piece..."></textarea></div>'
-    + '<div class="field"><label>Condition Notes</label><input type="text" id="aw-condition-' + n + '" placeholder="e.g. Excellent, minor scuff on frame"></div>'
     + '<div class="field"><label>Availability</label>'
     + '<select id="aw-avail-' + n + '"><option value="for_sale">For Sale</option><option value="nfs">Not For Sale (Display Only)</option><option value="commission">Commission Inquiry Only</option></select></div>'
-    + '<div class="field"><label>Placement Notes <span style="color:var(--ash);font-size:9px;">(optional)</span></label><input type="text" id="aw-placement-' + n + '" placeholder="e.g. Needs natural light, hang low"></div>'
     + '<div class="field"><label>Insurance Value ($)</label><input type="number" id="aw-insurance-' + n + '" placeholder="Replacement value" min="0" step="0.01"></div>'
+    + '<div class="field"><label>Quantity</label><input type="number" id="aw-quantity-' + n + '" placeholder="e.g. 1" min="1" step="1" value="1"></div>'
     + '<div class="field"><label>Type</label>'
     + '<select id="aw-type-' + n + '"><option value="consignment">Consignment (for sale)</option><option value="loan">Loan (display only, not for sale)</option></select></div>'
     + '<div class="field"><label>Edition Info <span style="color:var(--ash);font-size:9px;">(prints only)</span></label><input type="text" id="aw-edition-' + n + '" placeholder="e.g. 3 of 25"></div>'
@@ -473,10 +472,9 @@ function collectSubmission() {
       year:          (document.getElementById('aw-year-'      + n) || {}).value || '',
       price:         (document.getElementById('aw-price-'     + n) || {}).value || '0',
       description:   (document.getElementById('aw-desc-'      + n) || {}).value || '',
-      condition:     (document.getElementById('aw-condition-' + n) || {}).value || '',
       availability:  (document.getElementById('aw-avail-'     + n) || {}).value || 'for_sale',
-      placement:     (document.getElementById('aw-placement-' + n) || {}).value || '',
       insuranceValue:(document.getElementById('aw-insurance-' + n) || {}).value || '',
+      quantity:      (document.getElementById('aw-quantity-'  + n) || {}).value || '1',
       type:          (document.getElementById('aw-type-'      + n) || {}).value || 'consignment',
       edition:       (document.getElementById('aw-edition-'   + n) || {}).value || '',
       coa:           !!(document.getElementById('aw-coa-'     + n) || {}).checked,
@@ -534,13 +532,7 @@ function printBackingCards() {
     cards += '<div style="display:flex;justify-content:space-between;align-items:flex-end;">';
     cards += '<div style="font-size:10px;color:#555;line-height:1.7;">';
     cards += escHtml(currentExhibit.name) + '<br>';
-    if (phone) cards += escHtml(phone) + '<br>';
-    if (email) cards += escHtml(email);
-    cards += '</div>';
-    if (price) cards += '<div style="font-size:16px;font-weight:bold;">$' + parseFloat(price).toFixed(2) + '</div>';
-    cards += '</div>';
-    cards += '</div>';
-    printed++;
+    if (phone) cards += escHtml(phone) +inted++;
   }
 
   if (!printed) { ptoast('Please add at least one artwork with a title first.'); return; }
@@ -553,6 +545,57 @@ function printBackingCards() {
     + '.card-wrap{display:flex;flex-wrap:wrap;gap:0;padding:10px;}'
     + '</style></head><body>'
     + '<div class="card-wrap">' + cards + '</div>'
+    + '<script>window.onload=function(){window.print();};<\/script>'
+    + '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (w) {
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  } else {
+    ptoast('Please allow pop-ups in your browser, then try again.');
+  }
+}
+
+function printAgreement() {
+  if (!currentExhibit) { ptoast('Please select an exhibit first.'); return; }
+  var artistName = (document.getElementById('a-name') || {}).value.trim() || '___________________________';
+  var agreementText = buildAgreementText(currentExhibit);
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1.0">'
+    + '<style>'
+    + '@media print{body{margin:0;}@page{size:letter;margin:0.75in;}}'
+    + 'body{font-family:Georgia,serif;font-size:11pt;line-height:1.8;color:#000;background:#fff;padding:0.5in;}'
+    + 'h1{font-size:14pt;text-align:center;margin-bottom:4px;letter-spacing:1px;}'
+    + 'h2{font-size:12pt;text-align:center;margin-bottom:2px;}'
+    + '.subtitle{text-align:center;font-size:10pt;color:#555;margin-bottom:24px;}'
+    + '.meta{text-align:center;font-size:10pt;margin-bottom:28px;}'
+    + 'pre{font-family:Georgia,serif;font-size:10.5pt;line-height:1.8;white-space:pre-wrap;word-wrap:break-word;}'
+    + '.sig-block{margin-top:40px;border-top:1px solid #ccc;padding-top:20px;}'
+    + '.sig-row{display:flex;gap:40px;margin-top:20px;}'
+    + '.sig-field{flex:1;}'
+    + '.sig-line{border-bottom:1px solid #000;height:28px;margin-bottom:4px;}'
+    + '.sig-label{font-size:9pt;color:#555;}'
+    + '</style></head><body>'
+    + '<h1>THE RISING PHOENIX GALLERY LLC</h1>'
+    + '<h2>Exhibiting Artist Consignment Agreement</h2>'
+    + '<div class="subtitle">Terms &amp; Conditions for Short-Term Exhibition Consignments</div>'
+    + '<div class="meta"><strong>Exhibition:</strong> ' + escHtml(currentExhibit.name) + '&nbsp;&nbsp;&nbsp;<strong>Dates:</strong> ' + escHtml(currentExhibit.dates) + '</div>'
+    + '<pre>' + escHtml(agreementText.split('\n').slice(4).join('\n')) + '</pre>'
+    + '<div class="sig-block">'
+    + '<div class="sig-row">'
+    + '<div class="sig-field"><div class="sig-line"></div><div class="sig-label">Artist Signature</div></div>'
+    + '<div class="sig-field"><div class="sig-line"></div><div class="sig-label">Printed Name</div></div>'
+    + '<div class="sig-field"><div class="sig-line"></div><div class="sig-label">Date</div></div>'
+    + '</div>'
+    + '<div class="sig-row">'
+    + '<div class="sig-field"><div class="sig-line"></div><div class="sig-label">Gallery Representative Signature</div></div>'
+    + '<div class="sig-field"><div class="sig-line"></div><div class="sig-label">Printed Name</div></div>'
+    + '<div class="sig-field"><div class="sig-line"></div><div class="sig-label">Date</div></div>'
+    + '</div>'
+    + '</div>'
     + '<script>window.onload=function(){window.print();};<\/script>'
     + '</body></html>';
 
@@ -631,6 +674,17 @@ function fallbackDownload(json, filename, mailto) {
   setTimeout(function() { window.location.href = mailto; }, 900);
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL EXPORTS — ensure inline handlers work on all platforms
+═══════════════════════════════════════════════════════ */
+window.onExhibitChange  = onExhibitChange;
+window.addArtwork       = addArtwork;
+window.removeArtwork    = removeArtwork;
+window.printBackingCards = printBackingCards;
+window.exportAndEmail   = exportAndEmail;
+window.previewArtworkPhoto = previewArtworkPhoto;
+window.printAgreement       = printAgreement;
 /* ═══════════════════════════════════════════════════════
    INIT — wire up static artwork #1 photo inputs
 ═══════════════════════════════════════════════════════ */
