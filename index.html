@@ -104,6 +104,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
       <label for="exhibit-select">Which show are you submitting for?</label>
       <select id="exhibit-select" onchange="onExhibitChange()">
         <option value="">— Choose an exhibit —</option>
+        <option value="gift-shop-artist">Gift Shop Artist</option>
         <option value="whimsical-chaos">KaziDelicious Presents Whimsical Chaos</option>
         <option value="confessions">Confessions</option>
         <option value="hush-after-storm">The Hush After the Storm</option>
@@ -244,6 +245,13 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
    EXHIBIT DATA
 ═══════════════════════════════════════════════════════ */
 var EXHIBITS = {
+  'gift-shop-artist': {
+    name: 'Gift Shop Artist',
+    dropoff:   '',
+    reception: '',
+    dates:     '',
+    pickup:    ''
+  },
   'whimsical-chaos': {
     name: 'KaziDelicious Presents Whimsical Chaos',
     dropoff:   'March 27 – March 30, 2026',
@@ -319,12 +327,14 @@ function onExhibitChange() {
 
   currentExhibit = EXHIBITS[key];
 
-  // Fill dates bar
+  // Fill dates bar (hide if all dates are blank)
   document.getElementById('d-dropoff').textContent   = currentExhibit.dropoff;
   document.getElementById('d-reception').textContent = currentExhibit.reception;
   document.getElementById('d-exhibit').textContent   = currentExhibit.dates;
   document.getElementById('d-pickup').textContent    = currentExhibit.pickup;
-  datesBar.style.display = 'grid';
+  
+  var hasDates = currentExhibit.dropoff || currentExhibit.reception || currentExhibit.dates || currentExhibit.pickup;
+  datesBar.style.display = hasDates ? 'grid' : 'none';
 
   // Fill agreement
   document.getElementById('agreement-text').textContent = buildAgreementText(currentExhibit);
