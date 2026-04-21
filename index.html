@@ -80,12 +80,26 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
   box-shadow:0 4px 20px rgba(0,0,0,.5);pointer-events:none;opacity:0;transition:opacity .3s;}
 .toast.show{opacity:1;}
 
+/* Submission instructions modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10000;display:none;
+  align-items:center;justify-content:center;padding:18px;}
+.modal-backdrop.show{display:flex;}
+.submission-modal{width:min(560px,100%);background:var(--bg-card);border:2px solid var(--glow);
+  border-radius:8px;box-shadow:0 18px 60px rgba(0,0,0,.75);padding:22px;color:var(--white);}
+.submission-modal h2{font-family:'Cinzel',serif;font-size:15px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:14px;}
+.submission-modal ol{padding-left:22px;margin-bottom:16px;color:var(--smoke);font-size:14px;line-height:1.6;}
+.submission-modal li{margin-bottom:10px;}
+.submission-modal p{color:var(--smoke);font-size:14px;line-height:1.6;margin-bottom:12px;}
+.submission-modal .signoff{margin-top:14px;color:var(--white);}
+.submission-modal .btn-row{justify-content:flex-end;margin-top:18px;}
+
 /* Hidden until exhibit chosen */
 #main-form{display:none;}
 #main-form.visible{display:block;}
 
 /* Locked overlay for no-exhibit state */
-.no-exhibit-hint{text-align:center;padding:28px 16px;color:var(--ash);font-size:13px;letter-spacing:.5px;}
+.no-exhibit-hint{text-align:center;padding:28px 16px;color:var(--ash);font-size:16px;letter-spacing:.5px;}
 .no-exhibit-hint span{display:block;font-size:28px;margin-bottom:10px;}
 </style>
 </head>
@@ -132,7 +146,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
   <!-- ── MAIN FORM (shown after exhibit chosen) ── -->
   <div id="main-form">
 
-    <p class="hint" style="margin-bottom:16px;">Please fill out your contact information and add each artwork you are submitting. When done, tap <strong style="color:var(--gold);">Export &amp; Email Submission</strong> at the bottom.</p>
+    <p class="hint" style="font-size:13px;margin-bottom:16px;"><strong>Please fill out your contact information and add each artwork you are submitting. Don't worry if you don't know all the info, just fill in as much as you can. When done, tap</strong> <strong style="color:var(--gold);">Export &amp; Email Submission</strong> <strong>at the bottom.</strong></p>
 
     <!-- Artist Contact -->
     <div class="section-head"><h2>Your Contact Information</h2><div class="section-line"></div></div>
@@ -239,6 +253,22 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--glow);bo
 </div><!-- /wrap -->
 
 <div id="portal-toast" class="toast"></div>
+
+<div id="submission-instructions-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="submission-instructions-title">
+  <div class="submission-modal">
+    <h2 id="submission-instructions-title">Submission Instructions</h2>
+    <ol>
+      <li>Save the file "RPG-Submission-Your-Name.json"</li>
+      <li>Attach the file "RPG-Submission-Your-Name.json" to the email that should pop up. If an email dosen't pop up with our email address please open one.</li>
+      <li>Send the email to us at "RisingPhoenixGallery@gmail.com" .</li>
+    </ol>
+    <p>Thank you so much for sharring your amazing art work with us. We appreciate you!</p>
+    <p class="signoff">Sincerly,<br>The Rising Phoenix Team.</p>
+    <div class="btn-row">
+      <button id="submission-instructions-continue" class="btn btn-success" type="button">Continue to Save</button>
+    </div>
+  </div>
+</div>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ═══════════════════════════════════════════════════════
@@ -635,8 +665,7 @@ function escHtml(s) {
 
 /* ═══════════════════════════════════════════════════════
    EXPORT & EMAIL
-   Tries Web Share API (iOS native share sheet),
-   falls back to Blob download + mailto
+   Shows instructions, downloads the JSON, then opens email
 ═══════════════════════════════════════════════════════ */
 function exportAndEmail() {
   var data = collectSubmission();
@@ -652,25 +681,30 @@ function exportAndEmail() {
   );
   var mailto = 'mailto:' + GALLERY_EMAIL + '?subject=' + subject + '&body=' + body;
 
-  // Try Web Share API with file (works great on iOS Safari)
-  if (navigator.canShare) {
-    try {
-      var file = new File([json], filename, { type: 'application/json' });
-      if (navigator.canShare({ files: [file] })) {
-        navigator.share({
-          title: 'Artwork Submission \u2014 ' + data.exhibitName,
-          text:  'Please find my artwork submission for ' + data.exhibitName + ' attached.',
-          files: [file]
-        }).then(function() {
-          ptoast('Submission shared successfully!');
-        }).catch(function(err) {
-          if (err.name !== 'AbortError') fallbackDownload(json, filename, mailto);
-        });
-        return;
-      }
-    } catch(e) { /* fall through */ }
+  showSubmissionInstructions(function() {
+    startSubmissionExport(json, filename, mailto, data.exhibitName);
+  });
+}
+
+function showSubmissionInstructions(onContinue) {
+  var modal = document.getElementById('submission-instructions-modal');
+  var btn = document.getElementById('submission-instructions-continue');
+
+  if (!modal || !btn) {
+    onContinue();
+    return;
   }
 
+  modal.classList.add('show');
+  btn.focus();
+
+  btn.onclick = function() {
+    modal.classList.remove('show');
+    onContinue();
+  };
+}
+
+function startSubmissionExport(json, filename, mailto, exhibitName) {
   fallbackDownload(json, filename, mailto);
 }
 
